@@ -17163,4 +17163,32 @@ def loan_account_report_via_mail(request):
     messages.info(request,'Loan report shared via mail')
   return redirect('loan_account_report')
 
+
+
+def bank_statement_report(request):
+  # if request.method == 'POST':
+  if 'staff_id' in request.session:
+    staff_id = request.session['staff_id']
+  else:
+    return redirect('/')
+  staff = staff_details.objects.get(id=staff_id)
+  company_instance = staff.company 
+  party_name = request.POST.get('partyname')
+  allmodules= modules_list.objects.get(company=company_instance,status='New')
+
+  if LoanAccounts.objects.filter(company=staff.company).exists():
+    loan_account =  LoanAccounts.objects.filter(company=staff.company).first()
+    print(loan_account)
+    first_transaction = TransactionTable.objects.filter(company=staff.company).first()
+    company=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
+  else:
+    loan_account=''
+    first_transaction=''
+    company=''
+
+  context = {
+    'allmodules':allmodules,'staff':staff,'company':company,'loan_account':loan_account,'first_transaction':first_transaction,
+  }
+
+  return render(request,'company/bank_statement_report.html',context)
 #End

@@ -560,6 +560,8 @@ urlpatterns = [
     path('loan_account_report', views.loan_account_report, name='loan_account_report'),
     path('loan_account_report_via_mail', views.loan_account_report_via_mail, name='loan_account_report_via_mail'),
 
+    # ashikhvu
+    path('bank_statement_report', views.bank_statement_report, name='bank_statement_report'),
 
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     
