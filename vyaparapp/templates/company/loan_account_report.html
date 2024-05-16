@@ -254,12 +254,12 @@
                   width: 150px;
                 "
               >
-                <p style="margin-bottom: 5px">Paid</p>
-                <p style="font-size: large"><span id="paidval"></span></p>
+                <p style="margin-bottom: 5px">Totla Loan</p>
+                <p style="font-size: large"><span  id="unpaidval"></span></p>
               </div>
               <div class="text-dark pt-5">
                 <i
-                  class="fa fa-plus border-dark"
+                  class="fa fa-minus border-dark"
                   aria-hidden="true"
                   style="color: black"
                 ></i>
@@ -272,8 +272,8 @@
                   width: 150px;
                 "
               >
-                <p style="margin-bottom: 5px">Unpaid</p>
-                <p style="font-size: large"><span id="unpaidval"></span></p>
+                <p style="margin-bottom: 5px">EMI Paid</p>
+                <p style="font-size: large"><span id="paidval"></span></p>
               </div>
               <div class="text-dark pt-5">
                 <i class="fa-solid fa fa-equals" style="color: black"></i>
@@ -451,7 +451,7 @@
           <div class="row m-2 p-2 pt-3">
             <div class="col-sm-12 col-lg-3">
               <p class="tb fw-bolder pt-2" style="color: #0080ff">
-                SALES REPORT
+                LOAN REPORT
               </p>
               <div class="pt-2">
                 <div class="position-relative">
@@ -778,7 +778,7 @@
                   <h2 style="text-align: center; color: red">
                     {{staff.company.company_name}}
                   </h2>
-                  <h4 style="text-align: center">Sales Report</h4>
+                  <h4 style="text-align: center">Loan Report</h4>
                   <h5 style="text-align: center">
                     <span
                       id="sdate"
@@ -796,9 +796,9 @@
                         class="bg-success p-3 m-3 mr-3 ml-3 fs-3"
                         style="border-radius: 20px"
                       >
-                        <p style="margin-bottom: 5px">Paid</p>
+                        <p style="margin-bottom: 5px">Unpaid</p>
                         <p style="font-size: large">
-                          <span id="paidval1"></span>
+                          <span id="unpaidval1"></span>
                         </p>
                       </div>
                       <div class="text-dark pt-5">
@@ -812,9 +812,9 @@
                         class="bg-warning p-3 m-3 mr-3 ml-3 fs-3"
                         style="border-radius: 20px"
                       >
-                        <p style="margin-bottom: 5px">Unpaid</p>
+                        <p style="margin-bottom: 5px">Paid</p>
                         <p style="font-size: large">
-                          <span id="unpaidval1"></span>
+                          <span  id="paidval1"></span>
                         </p>
                       </div>
                       <div class="text-dark pt-5">
@@ -1070,7 +1070,7 @@
       const table = document.getElementById("myTable1"); // Replace 'myTable' with your table's ID
       const wb = XLSX.utils.table_to_book(table);
 
-      XLSX.writeFile(wb, "salesreport.xlsx");
+      XLSX.writeFile(wb, "Loan Report.xlsx");
       location.reload();
     }
   </script>
@@ -1092,7 +1092,7 @@
 
       var opt = {
         margin: 0.5,
-        filename: "Sales report" + ".pdf",
+        filename: "Loan report" + ".pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 4 },
         jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
@@ -1109,32 +1109,37 @@
       bal = 0;
       emi = 0;
       loan = 0;
+      var zer_condition = 0
       for (var i = 1; i < rows.length; i++) {
         if (rows[i].style.display != "none") {
           var ucells = rows[i].getElementsByTagName("td")[2];
-          var balance = rows[i].getElementsByTagName("td")[3];
+          var balance = rows[i].getElementsByTagName("td")[2];
           var uamount = rows[i].getElementsByTagName("td")[1];
 
           var uvalue = uamount.textContent || uamount.innerText;
 
           var utextValue = ucells.textContent || ucells.innerText;
+
           if (uvalue == "EMI") {
             emi += parseFloat(utextValue);
           }
-          loan = parseFloat(balance.innerText||balance.textContent);
-          // if (uvalue == "Loan Account") {
-          //   console.log('before '+loan)
-          //   loan = parseFloat(balance.innerText||balance.textContent);
-          //   console.log('after '+loan)
-          // }
-          // if (uvalue == "ADDITIONAL LOAN") {
-          //   console.log('before '+loan)
-          //   loan = parseFloat(balance.innerText||balance.textContent);
-          //   console.log('after '+loan)
-          // }
+          // loan = parseFloat(balance.innerText||balance.textContent);
+          else if (uvalue == "Loan Account") {
+            console.log('before '+loan)
+            loan += parseFloat(balance.innerText||balance.textContent);
+            console.log('after '+loan)
+          }
+          else if (uvalue == "ADDITIONAL LOAN") {
+            console.log('before '+loan)
+            loan += parseFloat(balance.innerText||balance.textContent);
+            console.log('after '+loan)
+          }
         }
       }
-
+      if (parseInt(loan) == 0)
+      {
+        loan=parseInt(`{{ loan_account.loan_amount }}`)
+      } 
       document.getElementById("paidval").textContent = emi;
       document.getElementById("unpaidval").textContent = loan;
       document.getElementById("totalval").textContent = loan-emi;

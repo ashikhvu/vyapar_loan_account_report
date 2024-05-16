@@ -17061,11 +17061,15 @@ def loan_account_report(request):
   party_name = request.POST.get('partyname')
   allmodules= modules_list.objects.get(company=company_instance,status='New')
 
-
-  loan_account =  LoanAccounts.objects.filter(company=staff.company).first()
-  print(loan_account)
-  first_transaction = TransactionTable.objects.filter(company=staff.company).first()
-  company=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
+  if LoanAccounts.objects.filter(company=staff.company).exists():
+    loan_account =  LoanAccounts.objects.filter(company=staff.company).first()
+    print(loan_account)
+    first_transaction = TransactionTable.objects.filter(company=staff.company).first()
+    company=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
+  else:
+    loan_account=''
+    first_transaction=''
+    company=''
 
   context = {
     'allmodules':allmodules,'staff':staff,'company':company,'loan_account':loan_account,'first_transaction':first_transaction,
@@ -17111,16 +17115,28 @@ def loan_account_report_via_mail(request):
       data=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
       
     emi = loan = balance=0
-
-    loan = loan_account.loan_amount
+    if loan_account:
+      loan = float(loan_account.loan_amount)
+    else:
+      loan =0
     balance = 0
 
     if data:
       for i in data:
         if i.transaction_type == "EMI":
           emi +=float(i.payment)
-        loan =float(i.balance_amount)
+        elif i.transaction_type == "Loan Account":
+          loan += float(i.payment)
+        elif i.transaction_type == "Additional Loan":
+          loan += float(i.payment)
     
+    if int(loan) == 0:
+      if loan_account:
+        loan = loan_account.loan_amount
+      else:
+        loan = 0
+    
+
     balance = float(loan)-float(emi)
 
     content={
