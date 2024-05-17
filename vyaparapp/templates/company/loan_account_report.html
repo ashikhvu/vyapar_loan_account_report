@@ -751,9 +751,6 @@
 
                     {% for c in Transactions %}
                     <tr>
-                      <!-- <td class="text-center hide_field no-export" >
-                                    <div >{{forloop.counter}}</div>
-                                </td>  -->
                       <td>{{c.date|date:"Y-m-d"}}</td>
                       <td>{{ c.transaction_type }}</td>
                       <td>{{c.payment}}</td>
@@ -996,7 +993,7 @@
 
       console.log(startDate);
       document.getElementById("sdate").innerHTML =
-        String(Date(startDate.toLocaleDateString())) + " TO ";
+        String(startDate.toLocaleDateString()) + " TO ";
       document.getElementById("s1date").innerHTML =
         String(startDate.toLocaleDateString()) + " TO ";
       ("");
@@ -1107,22 +1104,18 @@
             emi += parseFloat(utextValue);
           }
           // loan = parseFloat(balance.innerText||balance.textContent);
-          else if (uvalue == "Loan Account") {
+          if (uvalue == "Loan Amount") {
             console.log('before '+loan)
             loan += parseFloat(balance.innerText||balance.textContent);
             console.log('after '+loan)
           }
-          else if (uvalue == "ADDITIONAL LOAN") {
+          if(uvalue == "Additional Loan"){
             console.log('before '+loan)
             loan += parseFloat(balance.innerText||balance.textContent);
             console.log('after '+loan)
           }
         }
       }
-      if (parseInt(loan) == 0)
-      {
-        loan=parseInt(`{{ loan_account.loan_amount }}`)
-      } 
       document.getElementById("paidval").textContent = emi;
       document.getElementById("unpaidval").textContent = loan;
       document.getElementById("totalval").textContent = loan-emi;

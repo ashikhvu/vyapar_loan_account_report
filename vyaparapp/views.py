@@ -10827,6 +10827,7 @@ def add_loan_accounts_function(request):
 
         TransactionTable.objects.create(
                 date=formatted_date,
+                payment=current_balance,
                 loan_account=new_loan_account,
                 balance_amount=current_balance,company=cmp,
                 loan_received=loan_received,
@@ -11078,7 +11079,7 @@ CommonData = namedtuple('CommonData', ['date', 'type', 'principal_amount', 'inte
 
 def loan_accounts_view_page(request, eid):
     data = LoanAccounts.objects.get(id=eid)
-    data1 = TransactionTable.objects.filter(loan_account=eid)
+    data1 = TransactionTable.objects.filter(loan_account=eid).exclude(transaction_type="Loan Amount")
     staff_id = request.session['staff_id']
     staff = staff_details.objects.get(id=staff_id)
     get_company_id_using_user_id = company.objects.get(id=staff.company.id)
@@ -17124,48 +17125,35 @@ def loan_account_report_via_mail(request):
     staff=staff_details.objects.get(id=id)
 
     if from_date_str and To_date_str:
-      loan_account =  LoanAccounts.objects.filter(company=staff.company,date__range=[from_date_str,To_date_str]).first()
-      first_transaction = TransactionTable.objects.filter(company=staff.company).first()
-      data=TransactionTable.objects.filter(company=staff.company,date__range=[from_date_str,To_date_str]).exclude(id=first_transaction.id)
+      if LoanAccounts.objects.filter(company=staff.company).exists():
+        Transactions=TransactionTable.objects.filter(company=staff.company,date__range=[from_date_str,To_date_str])
     else:
-      loan_account =  LoanAccounts.objects.filter(company=staff.company).first()
-      first_transaction = TransactionTable.objects.filter(company=staff.company).first()
-      data=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
+      if LoanAccounts.objects.filter(company=staff.company).exists():
+        Transactions=TransactionTable.objects.filter(company=staff.company)
       
     emi = loan = balance=0
-    if loan_account:
-      loan = float(loan_account.loan_amount)
-    else:
-      loan =0
-    balance = 0
 
-    if data:
-      for i in data:
+
+    if Transactions:
+      for i in Transactions:
         if i.transaction_type == "EMI":
           emi +=float(i.payment)
         elif i.transaction_type == "Loan Account":
           loan += float(i.payment)
         elif i.transaction_type == "Additional Loan":
           loan += float(i.payment)
-    
-    if int(loan) == 0:
-      if loan_account:
-        loan = loan_account.loan_amount
-      else:
-        loan = 0
-    
+      
 
     balance = float(loan)-float(emi)
 
     content={
-    'data':data,
     'staff':staff,
     'emi':emi,
     'loan':loan,
     'balance':balance,
     'sdate':from_date_str,
     'edate':To_date_str,
-    'allmodules':allmodules,'staff':staff,'loan_account':loan_account,'first_transaction':first_transaction,
+    'allmodules':allmodules,'staff':staff,"Transactions":Transactions
     }
     template_path = 'company/loan_account_report_via_mail.html'
     template = get_template(template_path)

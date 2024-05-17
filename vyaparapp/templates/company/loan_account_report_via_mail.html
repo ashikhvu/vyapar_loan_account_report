@@ -80,24 +80,14 @@
 
             </thead>
             <tbody>
-                {% if loan_account %}
-                  <tbody>
+                {% for c in Transactions %}
                     <tr>
-                    <td style="width: auto">{{loan_account.date|date:'Y-m-d'}}</td>
-                    <td>Loan Account</td>
-                    <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                    <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
+                      <td>{{c.date|date:"Y-m-d"}}</td>
+                      <td>{{ c.transaction_type }}</td>
+                      <td>{{c.payment}}</td>
+                      <td>{{ c.balance_amount }}</td>
                     </tr>
-                    {% endif %}
-
-                {% for i in data %}
-                <tr>
-                    <td>{{i.date|date:'Y-m-d'}}</td>
-                    <td>{{ i.transaction_type }}</td>
-                    <td>{{i.payment}}</td>
-                    <td>{{i.balance_amount}}</td>
-                </tr>
-                {% endfor %}
+                    {% endfor %} 
             </tbody>
             
         </table>
