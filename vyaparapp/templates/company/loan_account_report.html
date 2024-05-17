@@ -749,22 +749,13 @@
                   </thead>
                   <tbody>
 
-                   {% if loan_account %}
-                    <tr>
-                    <td style="width: auto">{{loan_account.date|date:'Y-m-d'}}</td>
-                    <td>Loan Account</td>
-                    <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                    <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                    </tr>
-                    {% endif %}
-
-                    {% for c in company %}
+                    {% for c in Transactions %}
                     <tr>
                       <!-- <td class="text-center hide_field no-export" >
                                     <div >{{forloop.counter}}</div>
                                 </td>  -->
                       <td>{{c.date|date:"Y-m-d"}}</td>
-                      <td>{% if c.transaction_type == "EMI" %}EMI{% elif c.transaction_type == "Additional Loan" %}ADDITIONAL LOAN{% endif %}</td>
+                      <td>{{ c.transaction_type }}</td>
                       <td>{{c.payment}}</td>
                       <td>{{ c.balance_amount }}</td>
                     </tr>
@@ -843,19 +834,11 @@
                       <th>BALANCE</th>
                     </thead>
                     <tbody>
-                      {% if loan_account %}
-                      <tr>
-                        <td style="width: auto">{{loan_account.date|date:'Y-m-d'}}</td>
-                        <td>Loan Account</td>
-                        <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                        <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                      </tr>
-                      {% endif %}
 
-                      {% for c in company %}
+                      {% for c in Transactions %}
                       <tr>
                         <td style="width: auto">{{c.date|date:'Y-m-d'}}</td>
-                        <td>{% if c.transaction_type == "EMI" %}EMI{% elif c.transaction_type == "Additional Loan" %}ADDITIONAL LOAN{% endif %}</td>
+                        <td>{{ c.transaction_type }}</td>
                         <td>{{c.total_amount}}</td>
                         <td>{{c.balance_amount}}</td>
                       </tr>

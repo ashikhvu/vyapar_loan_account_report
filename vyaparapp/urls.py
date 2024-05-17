@@ -562,6 +562,7 @@ urlpatterns = [
 
     # ashikhvu
     path('bank_statement_report', views.bank_statement_report, name='bank_statement_report'),
+    path('bank_statement_report_send_mail', views.bank_statement_report_send_mail, name='bank_statement_report_send_mail'),
 
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     

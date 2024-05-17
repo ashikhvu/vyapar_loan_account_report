@@ -127,7 +127,7 @@
             <h2 style="color: red; text-align: center">
               {{staff.company.company_name}}
             </h2>
-            <h4 style="text-align: center">Loan Report</h4>
+            <h4 style="text-align: center">Bank Report</h4>
             <h5 style="text-align: center">
               <span id="s1date" style="color: black; text-align: center"></span>
               <span id="e1date" style="color: black; text-align: center"></span>
@@ -244,7 +244,7 @@
             </div>
           </div>
 
-          <div class="row mt-7" style="width: auto">
+          <!-- <div class="row mt-7" style="width: auto">
             <div class="d-flex">
               <div
                 class="p-3 m-3 mr-3 ml-3 fs-3"
@@ -254,12 +254,12 @@
                   width: 150px;
                 "
               >
-                <p style="margin-bottom: 5px">Totla Loan</p>
+                <p style="margin-bottom: 5px">Withdraw</p>
                 <p style="font-size: large"><span  id="unpaidval"></span></p>
               </div>
               <div class="text-dark pt-5">
                 <i
-                  class="fa fa-minus border-dark"
+                  class="fa fa-minus- border-dark"
                   aria-hidden="true"
                   style="color: black"
                 ></i>
@@ -272,11 +272,11 @@
                   width: 150px;
                 "
               >
-                <p style="margin-bottom: 5px">EMI Paid</p>
+                <p style="margin-bottom: 5px">Deposit</p>
                 <p style="font-size: large"><span id="paidval"></span></p>
               </div>
               <div class="text-dark pt-5">
-                <i class="fa-solid fa fa-equals" style="color: black"></i>
+                <i class="fa-solid fa fa-equals-" style="color: black"></i>
               </div>
               <div
                 class="p-3 m-3 mr-3 ml-3 fs-3"
@@ -287,10 +287,10 @@
                 "
               >
                 <p style="margin-bottom: 5px">Total Balance</p>
-                <p style="font-size: large"><span id="totalval"></span></p>
+                <p style="font-size: large"><span id="totalval">{{ total_balance }}</span></p>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -312,7 +312,7 @@
             <div class="modal-body">
               <form
                 method="post"
-                action="{% url 'loan_account_report_via_mail' %}"
+                action="{% url 'bank_statement_report_send_mail' %}"
                 id="email"
                 enctype="multipart/form-data"
               >
@@ -451,7 +451,7 @@
           <div class="row m-2 p-2 pt-3">
             <div class="col-sm-12 col-lg-3">
               <p class="tb fw-bolder pt-2" style="color: #0080ff">
-                LOAN REPORT
+                BANK REPORT
               </p>
               <div class="pt-2">
                 <div class="position-relative">
@@ -596,9 +596,9 @@
                     </th> -->
 
                     <th class="text-center fs-2 bg-secondary text-white">
-                      TYPE
+                        WITHDRAW
                       <div
-                        class="ropdown-toggle dropdown-toggle-split"
+                        class="ropdown-toggle dropdown-toggle-split ms-5"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                       >
@@ -672,7 +672,7 @@
                     </th> -->
 
                     <th class="text-center fs-2 bg-secondary text-white">
-                      AMOUNT
+                      DEPOSIT
                       <div
                         class="ropdown-toggle dropdown-toggle-split"
                         data-bs-toggle="dropdown"
@@ -717,7 +717,7 @@
                         aria-expanded="false"
                       >
                         <i
-                          class="fas fa-filter filter-button"
+                          class="fas fa-filter filter-button ms-5"
                           id="ia7"
                           style="color: black"
                         ></i>
@@ -748,28 +748,14 @@
                     </th>
                   </thead>
                   <tbody>
-
-                   {% if loan_account %}
+                    {% for i in Transactions %}
                     <tr>
-                    <td style="width: auto">{{loan_account.date|date:'Y-m-d'}}</td>
-                    <td>Loan Account</td>
-                    <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                    <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                    </tr>
-                    {% endif %}
-
-                    {% for c in company %}
-                    <tr>
-                      <!-- <td class="text-center hide_field no-export" >
-                                    <div >{{forloop.counter}}</div>
-                                </td>  -->
-                      <td>{{c.date|date:"Y-m-d"}}</td>
-                      <td>{% if c.transaction_type == "EMI" %}EMI{% elif c.transaction_type == "Additional Loan" %}ADDITIONAL LOAN{% endif %}</td>
-                      <td>{{c.payment}}</td>
-                      <td>{{ c.balance_amount }}</td>
+                      <td>{{ i.date|date:'Y-m-d' }}</td>
+                      <td>{{ i.withdraw|floatformat:'1' }}</td>
+                      <td>{{ i.deposit|floatformat:'1' }}</td>
+                      <td>{{ i.current_bank_balance|floatformat:'2' }}</td>
                     </tr>
                     {% endfor %} 
-                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -778,7 +764,7 @@
                   <h2 style="text-align: center; color: red">
                     {{staff.company.company_name}}
                   </h2>
-                  <h4 style="text-align: center">Loan Report</h4>
+                  <h4 style="text-align: center">Bank Report</h4>
                   <h5 style="text-align: center">
                     <span
                       id="sdate"
@@ -790,7 +776,7 @@
                     ></span>
                   </h5>
 
-                  <div class="row mt-7" style="width: auto">
+                  <!-- <div class="row mt-7" style="width: auto">
                     <div class="d-flex">
                       <div
                         class="bg-success p-3 m-3 mr-3 ml-3 fs-3"
@@ -803,7 +789,7 @@
                       </div>
                       <div class="text-dark pt-5">
                         <i
-                          class="fa fa-plus border-dark"
+                          class="fa fa-plus- border-dark"
                           aria-hidden="true"
                           style="color: black"
                         ></i>
@@ -819,7 +805,7 @@
                       </div>
                       <div class="text-dark pt-5">
                         <i
-                          class="fa-solid fa fa-equals"
+                          class="fa-solid fa fa-equals-"
                           style="color: black"
                         ></i>
                       </div>
@@ -833,7 +819,8 @@
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </div> -->
+                  <br><br>
 
                   <table class="table table-bordered" id="myTable1">
                     <thead style="color: blue">
@@ -843,24 +830,14 @@
                       <th>BALANCE</th>
                     </thead>
                     <tbody>
-                      {% if loan_account %}
-                      <tr>
-                        <td style="width: auto">{{loan_account.date|date:'Y-m-d'}}</td>
-                        <td>Loan Account</td>
-                        <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                        <td>{{loan_account.loan_amount|floatformat:'2' }}</td>
-                      </tr>
-                      {% endif %}
-
-                      {% for c in company %}
-                      <tr>
-                        <td style="width: auto">{{c.date|date:'Y-m-d'}}</td>
-                        <td>{% if c.transaction_type == "EMI" %}EMI{% elif c.transaction_type == "Additional Loan" %}ADDITIONAL LOAN{% endif %}</td>
-                        <td>{{c.total_amount}}</td>
-                        <td>{{c.balance_amount}}</td>
-                      </tr>
-                      {% endfor %} 
-                      </tr>
+                      {% for i in Transactions %}
+                    <tr>
+                      <td>{{ i.date|date:'Y-m-d' }}</td>
+                      <td>{{ i.withdraw|floatformat:'1' }}</td>
+                      <td>{{ i.deposit|floatformat:'1' }}</td>
+                      <td>{{ i.current_bank_balance|floatformat:'2' }}</td>
+                    </tr>
+                    {% endfor %} 
                     </tbody>
                   </table>
                 </div>
@@ -946,7 +923,7 @@
               console.log(this);
             }
           });
-        calculatetotal();
+        // calculatetotal();
       }
 
       $(".clear-filter").on("click", function () {
@@ -975,7 +952,7 @@
         $("#myTable1 tbody tr").filter(function () {
           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
         });
-        calculatetotal();
+        // calculatetotal();
       });
 
       $(document).on("click", ".btn_print", function (event) {
@@ -1013,7 +990,7 @@
 
       console.log(startDate);
       document.getElementById("sdate").innerHTML =
-        String(Date(startDate.toLocaleDateString())) + " TO ";
+        String(startDate.toLocaleDateString()) + " TO ";
       document.getElementById("s1date").innerHTML =
         String(startDate.toLocaleDateString()) + " TO ";
       ("");
@@ -1034,7 +1011,7 @@
           prow2.style.display = "none";
         }
       }
-      calculatetotal();
+      // calculatetotal();
     });
 
     $("#in2").on("change", function () {
@@ -1062,7 +1039,7 @@
           prow2.style.display = "none";
         }
       }
-      calculatetotal();
+      // calculatetotal();
     });
 
     function exportAsExcel() {
@@ -1070,7 +1047,7 @@
       const table = document.getElementById("myTable1"); // Replace 'myTable' with your table's ID
       const wb = XLSX.utils.table_to_book(table);
 
-      XLSX.writeFile(wb, "Loan Report.xlsx");
+      XLSX.writeFile(wb, "Bank Report.xlsx");
       location.reload();
     }
   </script>
@@ -1092,7 +1069,7 @@
 
       var opt = {
         margin: 0.5,
-        filename: "Loan report" + ".pdf",
+        filename: "Bank report" + ".pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 4 },
         jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
@@ -1101,52 +1078,52 @@
     }
   </script>
   <script>
-    calculatetotal();
+    // calculatetotal();
 
-    function calculatetotal() {
-      var table = document.getElementById("myTable");
-      var rows = table.getElementsByTagName("tr");
-      bal = 0;
-      emi = 0;
-      loan = 0;
-      var zer_condition = 0
-      for (var i = 1; i < rows.length; i++) {
-        if (rows[i].style.display != "none") {
-          var ucells = rows[i].getElementsByTagName("td")[2];
-          var balance = rows[i].getElementsByTagName("td")[2];
-          var uamount = rows[i].getElementsByTagName("td")[1];
+    // function calculatetotal() {
+    //   var table = document.getElementById("myTable");
+    //   var rows = table.getElementsByTagName("tr");
+    //   bal = 0;
+    //   emi = 0;
+    //   loan = 0;
+    //   var zer_condition = 0
+    //   for (var i = 1; i < rows.length; i++) {
+    //     if (rows[i].style.display != "none") {
+    //       var ucells = rows[i].getElementsByTagName("td")[2];
+    //       var balance = rows[i].getElementsByTagName("td")[2];
+    //       var uamount = rows[i].getElementsByTagName("td")[1];
 
-          var uvalue = uamount.textContent || uamount.innerText;
+    //       var uvalue = uamount.textContent || uamount.innerText;
 
-          var utextValue = ucells.textContent || ucells.innerText;
+    //       var utextValue = ucells.textContent || ucells.innerText;
 
-          if (uvalue == "EMI") {
-            emi += parseFloat(utextValue);
-          }
-          // loan = parseFloat(balance.innerText||balance.textContent);
-          else if (uvalue == "Loan Account") {
-            console.log('before '+loan)
-            loan += parseFloat(balance.innerText||balance.textContent);
-            console.log('after '+loan)
-          }
-          else if (uvalue == "ADDITIONAL LOAN") {
-            console.log('before '+loan)
-            loan += parseFloat(balance.innerText||balance.textContent);
-            console.log('after '+loan)
-          }
-        }
-      }
-      if (parseInt(loan) == 0)
-      {
-        loan=parseInt(`{{ loan_account.loan_amount }}`)
-      } 
-      document.getElementById("paidval").textContent = emi;
-      document.getElementById("unpaidval").textContent = loan;
-      document.getElementById("totalval").textContent = loan-emi;
-      document.getElementById("paidval1").textContent = emi;
-      document.getElementById("unpaidval1").textContent = loan;
-      document.getElementById("totalval1").textContent = loan-emi;
-    }
+    //       if (uvalue == "EMI") {
+    //         emi += parseFloat(utextValue);
+    //       }
+    //       // loan = parseFloat(balance.innerText||balance.textContent);
+    //       else if (uvalue == "Loan Account") {
+    //         console.log('before '+loan)
+    //         loan += parseFloat(balance.innerText||balance.textContent);
+    //         console.log('after '+loan)
+    //       }
+    //       else if (uvalue == "ADDITIONAL LOAN") {
+    //         console.log('before '+loan)
+    //         loan += parseFloat(balance.innerText||balance.textContent);
+    //         console.log('after '+loan)
+    //       }
+    //     }
+    //   }
+    //   if (parseInt(loan) == 0)
+    //   {
+    //     loan=parseInt(`{{ loan_account.loan_amount }}`)
+    //   } 
+    //   document.getElementById("paidval").textContent = emi;
+    //   document.getElementById("unpaidval").textContent = loan;
+    //   document.getElementById("totalval").textContent = loan-emi;
+    //   document.getElementById("paidval1").textContent = emi;
+    //   document.getElementById("unpaidval1").textContent = loan;
+    //   document.getElementById("totalval1").textContent = loan-emi;
+    // }
   </script>
   {% endblock %}
 </div>

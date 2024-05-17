@@ -172,7 +172,8 @@ class BankTransactionModel(models.Model):
     amount = models.BigIntegerField(default=0)
     created_date = models.DateTimeField(auto_now_add=True)
     transfer_type=models.CharField(max_length=255,null=True)
-    current_amount = models.BigIntegerField(default=0)
+    from_bank_current_amount = models.BigIntegerField(null=True,blank=True)
+    to_bank_current_amount = models.BigIntegerField(null=True,blank=True)
     last_action = models.CharField(max_length=255,null=True)
     by = models.CharField(max_length=255,null=True) 
     

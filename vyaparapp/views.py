@@ -1322,7 +1322,7 @@ def banks_list(request,pk):
   allmodules= modules_list.objects.get(company=get_company_id_using_user_id,status='New')
  
 
-  try:
+  if BankModel.objects.filter(company=get_company_id_using_user_id.id).exists():
     all_banks = BankModel.objects.filter(company=get_company_id_using_user_id.id)
     if pk == 0:
       first_bank = all_banks.first()
@@ -1360,7 +1360,7 @@ def banks_list(request,pk):
                                                       "staff":staff}) 
     else:
       return render(request,'company/bank_create_first_bank.html',{"allmodules":allmodules,'staff':staff}) 
-  except:
+  else:
     return render(request,'company/bank_create_first_bank.html',{"allmodules":allmodules,'staff':staff}) 
     
 
@@ -1630,6 +1630,8 @@ def bank_to_bank_transaction_create(request):
                                         amount=amount,
                                         last_action='CREATED',
                                         by = staff.first_name,
+                                        from_bank_current_amount=bank1.current_balance,
+                                        to_bank_current_amount=bank2.current_balance,
                                         )
     transaction_data.save()
     tr_history = BankTransactionHistory(company=get_company_id_using_user_id,
@@ -1671,6 +1673,7 @@ def bank_to_cash_transaction_create(request):
                                         date=date,
                                         last_action='CREATED',
                                         by = staff.first_name,
+                                        from_bank_current_amount=bank1.current_balance,
                                         )
     transaction_data.save()
     tr_history = BankTransactionHistory(company=get_company_id_using_user_id,
@@ -1713,6 +1716,7 @@ def cash_to_bank_transaction_create(request):
                                         date=date,
                                         last_action='CREATED',
                                         by = staff.first_name,
+                                        to_bank_current_amount=bank2.current_balance,
                                         )
     transaction_data.save()
     tr_history = BankTransactionHistory(company=get_company_id_using_user_id,
@@ -1761,6 +1765,7 @@ def get_adjust_bank_balance_create(request):
                                         date=date,
                                         last_action='CREATED',
                                         by = staff.first_name,
+                                        from_bank_current_amount=bank1.current_balance,
                                         )
     transaction_data.save()
     tr_history = BankTransactionHistory(company=get_company_id_using_user_id,
@@ -1874,14 +1879,18 @@ def update_bank_transaction(request,pk,bank_id):
       bank1 = BankModel.objects.get(id=trans.from_here.id)
       if trans.amount > int(amount):
         bank1.current_balance += (trans.amount-int(amount))
+        trans.from_bank_current_amount=bank1.current_balance
       else:
         bank1.current_balance -= (int(amount)-trans.amount)
+        trans.from_bank_current_amount=bank1.current_balance
       bank1.save()
       bank2 = BankModel.objects.get(id=trans.to_here.id)
       if trans.amount > int(amount):
         bank2.current_balance -= (trans.amount-int(amount))
+        trans.to_bank_current_amount=bank2.current_balance
       else:
         bank2.current_balance += (int(amount)-trans.amount)
+        trans.to_bank_current_amount=bank2.current_balance
       bank2.save()
       old_amount = trans.amount
       if old_amount != amount:
@@ -1908,8 +1917,10 @@ def update_bank_transaction(request,pk,bank_id):
       bank1 = BankModel.objects.get(id=trans.from_here.id)
       if trans.amount > int(amount):
         bank1.current_balance += (trans.amount-int(amount))
+        trans.from_bank_current_amount=bank1.current_balance
       else:
         bank1.current_balance -= (int(amount)-trans.amount)
+        trans.from_bank_current_amount=bank1.current_balance
       bank1.save()
       trans.amount = amount
       trans.save()
@@ -1930,8 +1941,10 @@ def update_bank_transaction(request,pk,bank_id):
       bank2 = BankModel.objects.get(id=trans.to_here.id)
       if trans.amount > int(amount):
         bank2.current_balance -= (trans.amount-int(amount))
+        trans.to_bank_current_amount = bank2.current_balance
       else:
         bank2.current_balance += (int(amount)-trans.amount)
+        trans.to_bank_current_amount = bank2.current_balance
       bank2.save()
       trans.amount = amount
       trans.save()
@@ -1952,8 +1965,10 @@ def update_bank_transaction(request,pk,bank_id):
       bank1 = BankModel.objects.get(id=trans.from_here.id)
       if trans.amount > int(amount):
         bank1.current_balance -= (trans.amount-int(amount))
+        trans.from_bank_current_amount=bank1.current_balance
       else:
         bank1.current_balance += (int(amount)-trans.amount)
+        trans.from_bank_current_amount=bank1.current_balance
       bank1.save()
       trans.amount = amount
       trans.save()
@@ -1974,8 +1989,10 @@ def update_bank_transaction(request,pk,bank_id):
       bank1 = BankModel.objects.get(id=trans.from_here.id)
       if trans.amount > int(amount):
         bank1.current_balance += (trans.amount-int(amount))
+        trans.from_bank_current_amount=bank1.current_balance
       else:
         bank1.current_balance -= (int(amount)-trans.amount)
+        trans.from_bank_current_amount=bank1.current_balance
       bank1.save()
       trans.amount = amount
       trans.save()
@@ -10778,6 +10795,7 @@ def add_loan_accounts_function(request):
         account_number = request.POST.get('account_number')
 
         lr = request.POST.get('lr')
+        print(f'\n{lr}')
         cheque_number = request.POST.get('cheque_number')
         upi_id = request.POST.get('upi_id')
         upi_id_for_fee = request.POST.get('upi_id_for_fee')
@@ -10808,8 +10826,11 @@ def add_loan_accounts_function(request):
             )
 
         TransactionTable.objects.create(
+                date=formatted_date,
                 loan_account=new_loan_account,
-                balance_amount=current_balance,company=cmp
+                balance_amount=current_balance,company=cmp,
+                loan_received=loan_received,
+                transaction_type="Loan Amount",
             )
         LoanHistory.objects.create(loan_account=new_loan_account, company=cmp, date=datetime.now(), action='CREATED')
 
@@ -10954,6 +10975,8 @@ def edit_loan_page_function(request, eid):
 
         balance = TransactionTable.objects.get(loan_account=eid, transaction_type__isnull=True)
         balance.balance_amount = edited_amount
+        # balance.date=formatted_date
+        # balance.loan_received =request.POST.get('loan_received')
         balance.save()
 
         all_transactions = TransactionTable.objects.filter(loan_account=eid)
@@ -11013,7 +11036,7 @@ def loan_accounts(request):
 
  
     if data:
-        data1 = TransactionTable.objects.filter(loan_account=data.id)
+        data1 = TransactionTable.objects.filter(loan_account=data.id).exclude(transaction_type="Loan Amount")
     else:
         data1 = []
 
@@ -11225,8 +11248,8 @@ def ForId(request, id):
   bank = BankModel.objects.filter(company=cmp,user=cmp.user)
   data = LoanAccounts.objects.get(id=id) 
   data2 = LoanAccounts.objects.filter(company=cmp)
-  data1 = TransactionTable.objects.filter(loan_account=id)
-  data4= TransactionTable.objects.filter(loan_account=id)
+  data1 = TransactionTable.objects.filter(loan_account=id).exclude(transaction_type="Loan Amount")
+  data4= TransactionTable.objects.filter(loan_account=id).exclude(transaction_type="Loan Amount")
   data5 = LoanAccounts.objects.filter(id=id) 
   
 
@@ -17062,17 +17085,12 @@ def loan_account_report(request):
   allmodules= modules_list.objects.get(company=company_instance,status='New')
 
   if LoanAccounts.objects.filter(company=staff.company).exists():
-    loan_account =  LoanAccounts.objects.filter(company=staff.company).first()
-    print(loan_account)
-    first_transaction = TransactionTable.objects.filter(company=staff.company).first()
-    company=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
+    Transactions=TransactionTable.objects.filter(company=staff.company)
   else:
-    loan_account=''
-    first_transaction=''
-    company=''
+    Transactions=''
 
   context = {
-    'allmodules':allmodules,'staff':staff,'company':company,'loan_account':loan_account,'first_transaction':first_transaction,
+    'allmodules':allmodules,'staff':staff,'Transactions':Transactions
   }
 
   return render(request,'company/loan_account_report.html',context)
@@ -17165,6 +17183,8 @@ def loan_account_report_via_mail(request):
 
 
 
+from django.db.models import Case,CharField,Value,When
+
 def bank_statement_report(request):
   # if request.method == 'POST':
   if 'staff_id' in request.session:
@@ -17176,19 +17196,134 @@ def bank_statement_report(request):
   party_name = request.POST.get('partyname')
   allmodules= modules_list.objects.get(company=company_instance,status='New')
 
-  if LoanAccounts.objects.filter(company=staff.company).exists():
-    loan_account =  LoanAccounts.objects.filter(company=staff.company).first()
-    print(loan_account)
-    first_transaction = TransactionTable.objects.filter(company=staff.company).first()
-    company=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
-  else:
-    loan_account=''
-    first_transaction=''
-    company=''
+  banks= BankModel.objects.filter(company=company_instance.id)
+  Transactions = list()
 
+  for i in banks:
+    Transactions += list(
+          BankTransactionModel.objects.filter(company=company_instance.id,from_here=i.id).annotate(current_bank_balance=F("from_bank_current_amount"),
+            withdraw=Case(
+              When(type="Cash Withdraw",from_here=i.id,then=F('amount')),
+              When(type="Adjustment Reduce",from_here=i.id,then=F('amount')),
+              When(type="BANK TO BANK",from_here=i.id,then=F('amount')),
+              default=None,
+              ),
+              deposit=Case(
+                When(type="Adjustment Increase",from_here=i.id,then=F('amount')),
+                default=None,
+              )
+            )
+          )+list(
+          BankTransactionModel.objects.filter(company=company_instance.id,to_here=i.id).annotate(current_bank_balance=F("to_bank_current_amount"),
+              deposit=Case(
+                When(type="Cash Deposit",to_here=i.id,then=F('amount')),
+                When(type="BANK TO BANK",to_here=i.id,then=F('amount')),
+                default=None,
+              ))
+          )
+        
   context = {
-    'allmodules':allmodules,'staff':staff,'company':company,'loan_account':loan_account,'first_transaction':first_transaction,
+    'allmodules':allmodules,'staff':staff,"Transactions":Transactions,
   }
 
   return render(request,'company/bank_statement_report.html',context)
+
+def bank_statement_report_send_mail(request):
+  if 'staff_id' in request.session:
+    staff_id = request.session['staff_id']
+  else:
+    return redirect('/')
+  staff = staff_details.objects.get(id=staff_id)
+  company_instance = staff.company 
+  party_name = request.POST.get('partyname')
+  allmodules= modules_list.objects.get(company=company_instance,status='New')
+
+  # loan_account =  LoanAccounts.objects.filter(company=staff.company).first()
+  # print(loan_account)
+  # first_transaction = TransactionTable.objects.filter(company=staff.company).first()
+  # company=TransactionTable.objects.filter(company=staff.company).exclude(id=first_transaction.id)
+
+  if request.method == 'POST':
+    from_date_str=request.POST['fdate']
+    To_date_str=request.POST['tdate']
+    search=request.POST['search']
+    filters_by=request.POST['filter']
+    emails_string = request.POST['email']
+    emails= [email.strip() for email in emails_string.split(',')]
+    mess=request.POST['message']
+
+    id=request.session.get('staff_id')
+    staff=staff_details.objects.get(id=id)
+
+    banks= BankModel.objects.filter(company=company_instance.id)
+    Transactions = list()
+
+    if from_date_str and To_date_str:
+      for i in banks:
+        Transactions += list(
+          BankTransactionModel.objects.filter(company=company_instance.id,from_here=i.id,date__range=[from_date_str,To_date_str]).annotate(current_bank_balance=F("from_bank_current_amount"),
+            withdraw=Case(
+              When(type="Cash Withdraw",from_here=i.id,then=F('amount')),
+              When(type="Adjustment Reduce",from_here=i.id,then=F('amount')),
+              When(type="BANK TO BANK",from_here=i.id,then=F('amount')),
+              default=None,
+              ),
+              deposit=Case(
+                When(type="Adjustment Increase",from_here=i.id,then=F('amount')),
+                default=None,
+              )
+            )
+          )+list(
+          BankTransactionModel.objects.filter(company=company_instance.id,to_here=i.id,date__range=[from_date_str,To_date_str]).annotate(current_bank_balance=F("to_bank_current_amount"),
+              deposit=Case(
+                When(type="Cash Deposit",to_here=i.id,then=F('amount')),
+                When(type="BANK TO BANK",to_here=i.id,then=F('amount')),
+                default=None,
+              ))
+          )
+    else:
+      for i in banks:
+        Transactions += list(
+          BankTransactionModel.objects.filter(company=company_instance.id,from_here=i.id).annotate(current_bank_balance=F("from_bank_current_amount"),
+            withdraw=Case(
+              When(type="Cash Withdraw",from_here=i.id,then=F('amount')),
+              When(type="Adjustment Reduce",from_here=i.id,then=F('amount')),
+              When(type="BANK TO BANK",from_here=i.id,then=F('amount')),
+              default=None,
+              ),
+              deposit=Case(
+                When(type="Adjustment Increase",from_here=i.id,then=F('amount')),
+                default=None,
+              )
+            )
+          )+list(
+          BankTransactionModel.objects.filter(company=company_instance.id,to_here=i.id).annotate(current_bank_balance=F("to_bank_current_amount"),
+              deposit=Case(
+                When(type="Cash Deposit",to_here=i.id,then=F('amount')),
+                When(type="BANK TO BANK",to_here=i.id,then=F('amount')),
+                default=None,
+              ))
+          )
+      
+   
+
+    content={
+    'staff':staff,
+    'sdate':from_date_str,
+    'edate':To_date_str,
+    'allmodules':allmodules,'staff':staff,"Transactions":Transactions,
+    }
+    template_path = 'company/bank_statement_report_send_mail.html'
+    template = get_template(template_path)
+
+    html  = template.render(content)
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+    pdf = result.getvalue()
+    filename = f'Bank Account Report.pdf'
+    email = EmailMessage(mess,from_email=settings.EMAIL_HOST_USER,to=emails)
+    email.attach(filename, pdf, "application/pdf")
+    email.send(fail_silently=False)
+    messages.info(request,'Bank report shared via mail')
+  return redirect('bank_statement_report')
 #End
